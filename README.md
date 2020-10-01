@@ -45,7 +45,58 @@ Instead, I will use recall as the metric. Recall is the sum of true positives di
 
 To compare the different models, I used a logistic regression model, with a different pipeline (optimising hyperparameters with GridSearchCV) for each of the 5 methods. As can be seen, all of the methods scored highly, with SMOTE scoring the highest. However, the tiny difference in recall score between SMOTE/ADASYN (0.994) and Oversampling (0.993) barely seems worth the extra time and computational power that is required for the former techniques. In fact even the base model, unadjusted for imbalance, had a recall score of 0.969.
 
+## Feature Selection with Boruta
+
+<p align="left">
+  <img src="https://github.com/joekryan/loan_data_project/blob/master/images/features.png">
+</p>
+
+In the data preparation process, as a result of a large dataset and encoding categorical features, the model ended up with almost 1600 features. This not only greatly increases the copmutational power needed to run predictive models, but also makes it more difficult to explain the model to a non-technical audience. 
+
+A good data scientist will want to select the important features from the model and remove ones that are not interesting or relevant to your model. There are many methods of feature selection, but most of them in some way involve selecting an arbitrary threshold. This is where Boruta comes in. 
+
+The idea behind Boruta is quite simple. First we duplicate all the columns, then the values within each column are shuffled, creating a twin 'shadow column' for each column. Then a classifier is trained on this dataset (typically a Random Forest), that can generate a feature importance value for each feature and shadow feature. Now, we take the importance of each original features and compare it with a threshold. This time, the threshold is defined as the highest feature importance recorded among the shadow features. When the importance of a feature is higher than this threshold, this is called a "hit". The idea is that a feature is useful only if it's capable of doing better than the best randomized feature.
 
 
+<p align="left">
+  <img src="https://cdn-images-1.medium.com/max/800/1*xYjfAdGeoOOQNVkPvZvbvw.png">
+</p>
 
+But, as is often the case with machine learning, just one iteration is never enough. 20 trials are more reliable than 1 trial and 100 trials are more reliable than 20 trials. At every iteration we check if a given feature is doing better then expected than random chance. We do this by simply comparing the number of times a feature did better than the shadow features using a binomial distribution. Let's take a feature and say we have absolutely no clue if it's useful or not. What is the probability that we shall keep it? The maximum level of uncertainty about the feature is expressed by a probability of 50%, like tossing a coin. Since each independent experiment can give a binary outcome (hit or no hit), a series of n trials follows a binomial distribution.
+
+
+<p align="left">
+  <img src="https://cdn-images-1.medium.com/max/800/1*XMlUyvnqFwaQA8EwFdUnOw.png">
+</p>
+
+In Boruta, there is not a hard threshold between a refusal and an acceptance area. Instead, there are 3 areas:
+
+* an area of refusal (the red area): the features that end up here are considered as noise, so they are dropped;
+* an area of irresolution (the blue area): Boruta is indecisive about the features that are in this area;
+* an area of acceptance (the green area): the features that are here are considered as predictive, so they are kept.
+
+<p align="left">
+  <img src="https://github.com/joekryan/loan_data_project/blob/master/images/boruta_forest.png">
+</p>
+
+My boruta implementation in this case used a Random Forest classifier. The only change from the default that I made was to set the percentage ('perc') to 90. This means that the threshold is set to 90% of the highest shadow value, rather than its full value. This means there will be a trade off where more false positives will be picked as relevant but also the less relevant features will be left out.
+
+<p align="left">
+  <img src="hhttps://github.com/joekryan/loan_data_project/blob/master/images/boruta_features.png">
+</p>
+
+After this first implementation, 35 features were selected, a decrease in feature number by almost 98%! And recall was still 99%!
+
+As you can see, some of these features might not pass a 'common sense' test for someone who is not familiar with machine learning and dummy variables. Plus, thinking about the business problem, having several predictive features as specific months when credit was issued will not be useful going forwards. So removing these gives a final group of 18 features!
+
+<p align="left">
+  <img src="hhttps://github.com/joekryan/loan_data_project/blob/master/images/features.png">
+</p>
+
+Running these through a logistic regression still provides a predictive model with a recall of 99%! Additionally, all of these features are things that can be easily explained and understood to a non-technical audience!
+
+## Conclusion
+
+* Computationally expensive techniques for dealing with imbalances such as SMOTE/ADASYN may not be worth it when the dataset is only marginally imbalanced.
+* Feature Selection can greatly decrease the complexity of the model, saving computational time/power and making it easier to explain the model to a non-technical audience
 
