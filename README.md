@@ -91,7 +91,7 @@ After this first implementation, 35 features were selected, a decrease in featur
 As you can see, some of these features might not pass a 'common sense' test for someone who is not familiar with machine learning and dummy variables. Plus, thinking about the business problem, having several predictive features as specific months when credit was issued will not be useful going forwards. So removing these gives a final group of 18 features!
 
 <p align="left">
-  <img src="https://github.com/joekryan/loan_data_project/blob/master/images/features.png">
+  <img src="https://github.com/joekryan/loan_data_project/blob/master/images/final_features.png">
 </p>
 
 Running these through a logistic regression still provides a predictive model with a recall of 99%! Additionally, all of these features are things that can be easily explained and understood to a non-technical audience!
