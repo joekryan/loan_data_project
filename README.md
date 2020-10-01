@@ -82,15 +82,16 @@ In Boruta, there is not a hard threshold between a refusal and an acceptance are
 My boruta implementation in this case used a Random Forest classifier. The only change from the default that I made was to set the percentage ('perc') to 90. This means that the threshold is set to 90% of the highest shadow value, rather than its full value. This means there will be a trade off where more false positives will be picked as relevant but also the less relevant features will be left out.
 
 <p align="left">
-  <img src="hhttps://github.com/joekryan/loan_data_project/blob/master/images/boruta_features.png">
+  <img src="https://github.com/joekryan/loan_data_project/blob/master/images/boruta_features.png">
 </p>
+
 
 After this first implementation, 35 features were selected, a decrease in feature number by almost 98%! And recall was still 99%!
 
 As you can see, some of these features might not pass a 'common sense' test for someone who is not familiar with machine learning and dummy variables. Plus, thinking about the business problem, having several predictive features as specific months when credit was issued will not be useful going forwards. So removing these gives a final group of 18 features!
 
 <p align="left">
-  <img src="hhttps://github.com/joekryan/loan_data_project/blob/master/images/features.png">
+  <img src="https://github.com/joekryan/loan_data_project/blob/master/images/features.png">
 </p>
 
 Running these through a logistic regression still provides a predictive model with a recall of 99%! Additionally, all of these features are things that can be easily explained and understood to a non-technical audience!
